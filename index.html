@@ -3,63 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> J Initiative Opioid Potency Visualization Tool </title>
+    <meta name="description" content="Interactive opioid potency visualization tool">
+    <title>The J Initiative Opioid Potency Visualization</title>
     <style>
+        :root {
+            --primary-bg: #0d1117;
+            --primary-text: #c9d1d9;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --traditional-color: #58a6ff;
+            --synthetic-color: #ff7b72;
+            --nitazene-color: #d2a8ff;
+            --warning-color: #ff9900;
+            --container-max-width: 1400px;
+            --scale-height: 600px;
+            --marker-size: 10px;
+            --spacing-unit: 1rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             margin: 0;
-            padding: 2rem;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: #0d1117;
-            color: #c9d1d9;
+            padding: calc(var(--spacing-unit) * 2);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--primary-bg);
+            color: var(--primary-text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .container {
-            max-width: 1400px; /* Increased from 1200px */
+            max-width: var(--container-max-width);
             margin: 0 auto;
+            will-change: transform;
         }
 
         h1 {
             text-align: center;
-            color: #c9d1d9;
-            margin-bottom: 2rem;
+            margin-bottom: calc(var(--spacing-unit) * 2);
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
         }
 
         .legend {
             display: flex;
             justify-content: flex-end;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: var(--spacing-unit);
+            margin-bottom: var(--spacing-unit);
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: calc(var(--spacing-unit) * 0.5);
             font-size: 0.9rem;
         }
 
         .legend-dot {
-            width: 10px;
-            height: 10px;
+            width: var(--marker-size);
+            height: var(--marker-size);
             border-radius: 50%;
+            flex-shrink: 0;
         }
 
         .potency-scale {
             position: relative;
-            width: calc(100% - 4rem);
-            max-width: 1400px; /* Increased from 1200px */
-            margin: 2rem auto;
-            height: 600px;
+            width: calc(100% - calc(var(--spacing-unit) * 4));
+            max-width: var(--container-max-width);
+            margin: calc(var(--spacing-unit) * 2) auto;
+            height: var(--scale-height);
             background: rgba(255, 255, 255, 0.03);
             border-radius: 12px;
-            padding: 4rem; /* Increased from 2rem */
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: calc(var(--spacing-unit) * 4);
+            border: 1px solid var(--border-color);
+            contain: content;
         }
 
         .scale-line {
             position: absolute;
-            left: 4rem;  /* Increased from 2rem */
-            right: 4rem; /* Increased from 2rem */
+            left: calc(var(--spacing-unit) * 4);
+            right: calc(var(--spacing-unit) * 4);
             top: 50%;
             height: 1px;
             background: rgba(255, 255, 255, 0.2);
@@ -78,7 +105,8 @@
             display: flex;
             align-items: center;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease;
+            contain: content;
         }
 
         .opioid-marker:hover {
@@ -86,31 +114,34 @@
         }
 
         .marker-dot {
-            width: 10px;
-            height: 10px;
+            width: var(--marker-size);
+            height: var(--marker-size);
             border-radius: 50%;
             margin-right: 8px;
+            flex-shrink: 0;
         }
 
         .marker-label {
             font-size: 0.9rem;
             color: rgba(255, 255, 255, 0.9);
+            white-space: nowrap;
         }
 
         .tooltip {
             position: absolute;
             background: #1c2128;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 1rem;
+            padding: var(--spacing-unit);
             width: max-content;
             max-width: 300px;
-            color: #c9d1d9;
+            color: var(--primary-text);
             font-size: 0.9rem;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.2s ease;
             z-index: 1000;
+            contain: content;
         }
 
         .tooltip h3 {
@@ -124,7 +155,7 @@
 
         .tooltip .mme {
             font-weight: bold;
-            color: #58a6ff;
+            color: var(--traditional-color);
         }
 
         .tooltip .warning {
@@ -133,7 +164,7 @@
             background: rgba(255, 153, 0, 0.1);
             border: 1px solid rgba(255, 153, 0, 0.2);
             border-radius: 4px;
-            color: #ff9900;
+            color: var(--warning-color);
         }
     </style>
 </head>
@@ -142,15 +173,15 @@
         <h1>Opioid Potency Visualization</h1>
         <div class="legend">
             <div class="legend-item">
-                <div class="legend-dot" style="background: #58a6ff;"></div>
+                <div class="legend-dot" style="background: var(--traditional-color);"></div>
                 <span>Traditional</span>
             </div>
             <div class="legend-item">
-                <div class="legend-dot" style="background: #ff7b72;"></div>
+                <div class="legend-dot" style="background: var(--synthetic-color);"></div>
                 <span>Synthetic</span>
             </div>
             <div class="legend-item">
-                <div class="legend-dot" style="background: #d2a8ff;"></div>
+                <div class="legend-dot" style="background: var(--nitazene-color);"></div>
                 <span>Nitazene</span>
             </div>
         </div>
@@ -159,66 +190,76 @@
 
     <script>
         class OpioidVisualization {
+            #container;
+            #data;
+            #documentFragment;
+            #throttleTimer;
+
+            static OPIOID_DATA = [
+                { name: "Codeine", mme: 0.15, type: "Traditional", details: "Common in cough medications" },
+                { name: "Morphine", mme: 1, type: "Traditional", details: "Reference standard opioid" },
+                { name: "Hydrocodone", mme: 1, type: "Traditional", details: "Common prescription opioid" },
+                { name: "Oxycodone", mme: 1.5, type: "Traditional", details: "Commonly prescribed pain medication" },
+                { name: "Hydromorphone", mme: 4, type: "Traditional", details: "Used for severe pain" },
+                { name: "Fentanyl", mme: 100, type: "Synthetic", details: "Extremely potent synthetic opioid", warning: "Extreme potency - high overdose risk" },
+                { name: "Isotonitazene", mme: 500, type: "Nitazene", details: "Novel synthetic opioid", warning: "Extreme potency - high overdose risk" },
+                { name: "Metonitazene", mme: 700, type: "Nitazene", details: "Novel synthetic opioid", warning: "Extreme potency - high overdose risk" },
+                { name: "Carfentanil", mme: 10000, type: "Synthetic", details: "Used as large animal tranquilizer", warning: "Extreme potency - high overdose risk" }
+            ];
+
+            static SCALE_MARKERS = [0.1, 1, 10, 100, 1000, 10000];
+
+            static COLORS = {
+                'Traditional': 'var(--traditional-color)',
+                'Synthetic': 'var(--synthetic-color)',
+                'Nitazene': 'var(--nitazene-color)'
+            };
+
             constructor(containerId) {
-                this.container = document.getElementById(containerId);
-                this.data = [
-                    { name: "Codeine", mme: 0.15, type: "Traditional", details: "Common in cough medications" },
-                    { name: "Morphine", mme: 1, type: "Traditional", details: "Reference standard opioid" },
-                    { name: "Hydrocodone", mme: 1, type: "Traditional", details: "Common prescription opioid" },
-                    { name: "Oxycodone", mme: 1.5, type: "Traditional", details: "Commonly prescribed pain medication" },
-                    { name: "Hydromorphone", mme: 4, type: "Traditional", details: "Used for severe pain" },
-                    { name: "Fentanyl", mme: 100, type: "Synthetic", details: "Extremely potent synthetic opioid", warning: "Extreme potency - high overdose risk" },
-                    { name: "Isotonitazene", mme: 500, type: "Nitazene", details: "Novel synthetic opioid", warning: "Extreme potency - high overdose risk" },
-                    { name: "Metonitazene", mme: 700, type: "Nitazene", details: "Novel synthetic opioid", warning: "Extreme potency - high overdose risk" },
-                    { name: "Carfentanil", mme: 10000, type: "Synthetic", details: "Used as large animal tranquilizer", warning: "Extreme potency - high overdose risk" }
-                ];
-                this.init();
+                this.#container = document.getElementById(containerId);
+                if (!this.#container) throw new Error('Container element not found');
+                
+                this.#data = [...OpioidVisualization.OPIOID_DATA].sort((a, b) => a.mme - b.mme);
+                this.#documentFragment = document.createDocumentFragment();
+                
+                this.#init();
+                this.#setupResizeHandler();
             }
 
-            init() {
-                this.createScaleLine();
-                this.plotOpioids();
+            #init() {
+                this.#createScaleLine();
+                this.#plotOpioids();
+                this.#container.appendChild(this.#documentFragment);
             }
 
-            createScaleLine() {
+            #createScaleLine() {
                 const line = document.createElement('div');
                 line.className = 'scale-line';
-                this.container.appendChild(line);
+                this.#documentFragment.appendChild(line);
 
-                const markers = [0.1, 1, 10, 100, 1000, 10000];
-                markers.forEach(value => {
+                const markerFragment = document.createDocumentFragment();
+                OpioidVisualization.SCALE_MARKERS.forEach(value => {
                     const marker = document.createElement('div');
                     marker.className = 'scale-marker';
-                    marker.style.left = `${this.getXPosition(value)}%`;
+                    marker.style.left = `${this.#calculateXPosition(value)}%`;
                     marker.textContent = `${value}x MME`;
-                    this.container.appendChild(marker);
+                    markerFragment.appendChild(marker);
                 });
+                this.#documentFragment.appendChild(markerFragment);
             }
 
-            getXPosition(mme) {
-                const minMMe = 0.1;
-                const maxMMe = 10000;
-                const logMin = Math.log10(minMMe);
-                const logMax = Math.log10(maxMMe);
+            #calculateXPosition(mme) {
+                const logMin = Math.log10(0.1);
+                const logMax = Math.log10(10000);
                 const logValue = Math.log10(mme);
-                // Add padding to the calculation (80% of width instead of 100%)
                 return 10 + ((logValue - logMin) / (logMax - logMin)) * 80;
             }
 
-            getYPosition(index) {
+            #calculateYPosition(index) {
                 return 10 + (index * 45);
             }
 
-            getColorByType(type) {
-                const colors = {
-                    'Traditional': '#58a6ff',
-                    'Synthetic': '#ff7b72',
-                    'Nitazene': '#d2a8ff'
-                };
-                return colors[type];
-            }
-
-            createTooltip(opioid) {
+            #createTooltip(opioid) {
                 const tooltip = document.createElement('div');
                 tooltip.className = 'tooltip';
                 tooltip.innerHTML = `
@@ -231,47 +272,66 @@
                 return tooltip;
             }
 
-            createOpioidMarker(opioid, index) {
+            #createOpioidMarker(opioid, index) {
                 const marker = document.createElement('div');
                 marker.className = 'opioid-marker';
-                marker.style.left = `${this.getXPosition(opioid.mme)}%`;
-                marker.style.top = `${this.getYPosition(index)}px`;
+                marker.style.left = `${this.#calculateXPosition(opioid.mme)}%`;
+                marker.style.top = `${this.#calculateYPosition(index)}px`;
 
                 const dot = document.createElement('div');
                 dot.className = 'marker-dot';
-                dot.style.backgroundColor = this.getColorByType(opioid.type);
+                dot.style.backgroundColor = OpioidVisualization.COLORS[opioid.type];
 
                 const label = document.createElement('div');
                 label.className = 'marker-label';
                 label.textContent = opioid.name;
 
-                const tooltip = this.createTooltip(opioid);
+                const tooltip = this.#createTooltip(opioid);
 
-                marker.appendChild(dot);
-                marker.appendChild(label);
-                marker.appendChild(tooltip);
+                marker.append(dot, label, tooltip);
 
-                marker.addEventListener('mouseenter', () => {
-                    tooltip.style.opacity = '1';
-                });
-
-                marker.addEventListener('mouseleave', () => {
-                    tooltip.style.opacity = '0';
-                });
+                this.#addTooltipListeners(marker, tooltip);
 
                 return marker;
             }
 
-            plotOpioids() {
-                this.data.sort((a, b) => a.mme - b.mme).forEach((opioid, index) => {
-                    const marker = this.createOpioidMarker(opioid, index);
-                    this.container.appendChild(marker);
+            #addTooltipListeners(marker, tooltip) {
+                marker.addEventListener('mouseenter', () => {
+                    tooltip.style.opacity = '1';
+                }, { passive: true });
+
+                marker.addEventListener('mouseleave', () => {
+                    tooltip.style.opacity = '0';
+                }, { passive: true });
+            }
+
+            #plotOpioids() {
+                const markersFragment = document.createDocumentFragment();
+                this.#data.forEach((opioid, index) => {
+                    const marker = this.#createOpioidMarker(opioid, index);
+                    markersFragment.appendChild(marker);
                 });
+                this.#documentFragment.appendChild(markersFragment);
+            }
+
+            #setupResizeHandler() {
+                const throttledResize = () => {
+                    if (!this.#throttleTimer) {
+                        this.#throttleTimer = setTimeout(() => {
+                            this.#throttleTimer = null;
+                            // Implement resize handling if needed
+                        }, 250);
+                    }
+                };
+
+                window.addEventListener('resize', throttledResize, { passive: true });
             }
         }
 
-        // Initialize the visualization
-        new OpioidVisualization('potencyScale');
+        // Initialize the visualization when DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new OpioidVisualization('potencyScale');
+        });
     </script>
 </body>
 </html>
